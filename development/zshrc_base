@@ -1,0 +1,61 @@
+# 1. ANTIDOTE (Load plugins first so they are available)
+source $(brew --prefix)/opt/antidote/share/antidote/antidote.zsh
+antidote load
+
+
+# 2. USER CUSTOMIZATIONS (Your aliases, functions, etc.)
+
+# History configuration
+HISTFILE=~/.zsh_history
+HISTSIZE=50000
+SAVEHIST=50000
+setopt EXTENDED_HISTORY
+setopt SHARE_HISTORY
+setopt HIST_EXPIRE_DUPS_FIRST
+setopt HIST_IGNORE_DUPS
+setopt HIST_IGNORE_ALL_DUPS
+setopt HIST_FIND_NO_DUPS
+setopt HIST_SAVE_NO_DUPS
+
+# oh-my-zsh style word boundaries
+WORDCHARS=''
+
+# Key bindings for history substring search
+bindkey '^[[A' history-substring-search-up      # Up arrow
+bindkey '^[[B' history-substring-search-down    # Down arrow
+#bindkey '^P' history-substring-search-up        # Ctrl+P (backup)
+#bindkey '^N' history-substring-search-down      # Ctrl+N (backup)
+
+# Also try these if the above doesn't work (different terminal emulators send different codes)
+bindkey '^[OA' history-substring-search-up      # Up arrow (alternative)
+bindkey '^[OB' history-substring-search-down    # Down arrow (alternative)
+
+# Enhanced completion system
+autoload -Uz compinit
+compinit
+
+# Make completion case-insensitive and partial-match friendly
+zstyle ':completion:*' matcher-list 'm:{a-zA-Z}={A-Za-z}' 'r:|[._-]=* r:|=*' 'l:|=* r:|=*'
+zstyle ':completion:*' menu select
+zstyle ':completion:*' list-colors ''
+
+# Enable approximate matching
+zstyle ':completion:*' completer _complete _match _approximate
+zstyle ':completion:*:match:*' original only
+zstyle ':completion:*:approximate:*' max-errors 1 numeric
+
+# --- UV/UVX Features ---
+eval "$(uv generate-shell-completion zsh)"
+eval "$(uvx --generate-shell-completion zsh)"
+
+# --- FNM Features ---
+# Load fnm completions
+eval "$(fnm completions --shell zsh)"
+
+# Automatic version switching when changing directories
+eval "$(fnm env --use-on-cd --shell zsh)"
+
+
+# 3. STARSHIP (Load the prompt LAST)
+# It needs to wrap around everything else you've loaded.
+eval "$(starship init zsh)"

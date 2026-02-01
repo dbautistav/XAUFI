@@ -1,0 +1,18 @@
+# Ensures PATH only contains unique values (no duplicates)
+typeset -U path
+
+# Homebrew setup
+export HOMEBREW_NO_ANALYTICS=1
+eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv zsh)"
+
+
+# Load private API keys
+[[ -f ~/.zshenv_secrets ]] && source ~/.zshenv_secrets
+
+
+# fnm environment
+export FNM_PATH="$HOME/.local/share/fnm"
+if [ -d "$FNM_PATH" ]; then
+  export PATH="$FNM_PATH:$PATH"
+  eval "`fnm env`"
+fi
