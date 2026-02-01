@@ -30,6 +30,10 @@ bindkey '^[[B' history-substring-search-down    # Down arrow
 bindkey '^[OA' history-substring-search-up      # Up arrow (alternative)
 bindkey '^[OB' history-substring-search-down    # Down arrow (alternative)
 
+# Word movement with Ctrl+Left and Ctrl+Right
+bindkey '^[[1;5C' forward-word      # Ctrl+Right
+bindkey '^[[1;5D' backward-word     # Ctrl+Left
+
 # Enhanced completion system
 autoload -Uz compinit
 compinit
