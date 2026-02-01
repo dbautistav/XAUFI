@@ -13,6 +13,7 @@ echo 'XAUFI: After Ubuntu Fresh Install'
 ./development/dev-vscode.sh
 ./development/dev-shell.sh
 
+./internet/internet-firefox.sh
 ./utilities/utils-zip-rar.sh
 # ./extras/extras-numix.sh
 

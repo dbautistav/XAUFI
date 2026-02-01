@@ -7,6 +7,7 @@ sudo apt-get install -y zsh
 sudo apt-get install -y git-core
 
 sudo chsh -s `which zsh`
+echo $SHELL
 
 
 ## Install Nerd Fonts --------------------------------------
@@ -14,6 +15,7 @@ sudo chsh -s `which zsh`
 curl -fsSL https://raw.githubusercontent.com/getnf/getnf/main/install.sh | bash
 source $HOME/.local/bin
 getnf -i 21,24,29,41,47,52,59
+fc-cache -fv
 
 ## Install Starship ----------------------------------------
 
