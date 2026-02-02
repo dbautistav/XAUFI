@@ -48,11 +48,18 @@ zstyle ':completion:*' completer _complete _match _approximate
 zstyle ':completion:*:match:*' original only
 zstyle ':completion:*:approximate:*' max-errors 1 numeric
 
-# --- UV/UVX Features ---
+# --- FZF Setup ---
+# Example: Disable ALT-C (change directory) but keep CTRL-R (history search)
+FZF_ALT_C_COMMAND= source <(fzf --zsh)
+
+# --- Zoxide Setup ---
+eval "$(zoxide init zsh)"
+
+# --- uv/uvx completions ---
 eval "$(uv generate-shell-completion zsh)"
 eval "$(uvx --generate-shell-completion zsh)"
 
-# --- FNM Features ---
+# --- fnm Features ---
 # Load fnm completions
 eval "$(fnm completions --shell zsh)"
 

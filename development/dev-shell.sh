@@ -27,6 +27,14 @@ starship preset catppuccin-powerline -o ~/.config/starship.toml
 brew install antidote
 source $(brew --prefix)/opt/antidote/share/antidote/antidote.zsh
 
+## Install zoxide ------------------------------------------
+
+curl -sSfL https://raw.githubusercontent.com/ajeetdsouza/zoxide/main/install.sh | sh
+
+## Install fzf ---------------------------------------------
+
+sudo apt-get update
+sudo apt install fzf
 
 ## Run command as login shell ------------------------------
 
