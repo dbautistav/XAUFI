@@ -1,9 +1,22 @@
-# 1. ANTIDOTE (Load plugins first so they are available)
-source $(brew --prefix)/opt/antidote/share/antidote/antidote.zsh
-antidote load
+# 1. PATHS & FPATH (Do this first)
+typeset -U path fpath # Prevent duplicates
+fpath=($HOME/.zsh/completions $HOME/.bun $fpath)
 
 
-# 2. USER CUSTOMIZATIONS (Your aliases, functions, etc.)
+# 2. COMPLETION ENGINE
+autoload -Uz compinit
+compinit
+
+# Make completion case-insensitive and partial-match friendly
+zstyle ':completion:*' matcher-list 'm:{a-zA-Z}={A-Za-z}' 'r:|[._-]=* r:|=*' 'l:|=* r:|=*'
+zstyle ':completion:*' menu select
+zstyle ':completion:*' list-colors ''
+
+# Enable approximate matching
+zstyle ':completion:*' completer _complete _match _approximate
+zstyle ':completion:*:match:*' original only
+zstyle ':completion:*:approximate:*' max-errors 1 numeric
+
 
 # History configuration
 HISTFILE=~/.zsh_history
@@ -20,11 +33,22 @@ setopt HIST_SAVE_NO_DUPS
 # oh-my-zsh style word boundaries
 WORDCHARS=''
 
+
+# 3. ANTIDOTE (Static loading)
+source $(brew --prefix)/opt/antidote/share/antidote/antidote.zsh
+zsh_plugins="$HOME/.zsh_plugins.txt"
+zsh_plugins_compiled="$HOME/.zsh_plugins.zsh"
+
+if [[ ! -f "$zsh_plugins_compiled" || "$zsh_plugins" -nt "$zsh_plugins_compiled" ]]; then
+  antidote bundle < "$zsh_plugins" > "$zsh_plugins_compiled"
+fi
+source "$zsh_plugins_compiled"
+
+
+# 4. KEY BINDINGS
 # Key bindings for history substring search
 bindkey '^[[A' history-substring-search-up      # Up arrow
 bindkey '^[[B' history-substring-search-down    # Down arrow
-#bindkey '^P' history-substring-search-up        # Ctrl+P (backup)
-#bindkey '^N' history-substring-search-down      # Ctrl+N (backup)
 
 # Also try these if the above doesn't work (different terminal emulators send different codes)
 bindkey '^[OA' history-substring-search-up      # Up arrow (alternative)
@@ -34,39 +58,36 @@ bindkey '^[OB' history-substring-search-down    # Down arrow (alternative)
 bindkey '^[[1;5C' forward-word      # Ctrl+Right
 bindkey '^[[1;5D' backward-word     # Ctrl+Left
 
-# Enhanced completion system
-autoload -Uz compinit
-compinit
 
-# Make completion case-insensitive and partial-match friendly
-zstyle ':completion:*' matcher-list 'm:{a-zA-Z}={A-Za-z}' 'r:|[._-]=* r:|=*' 'l:|=* r:|=*'
-zstyle ':completion:*' menu select
-zstyle ':completion:*' list-colors ''
-
-# Enable approximate matching
-zstyle ':completion:*' completer _complete _match _approximate
-zstyle ':completion:*:match:*' original only
-zstyle ':completion:*:approximate:*' max-errors 1 numeric
-
-# --- FZF Setup ---
-# Example: Disable ALT-C (change directory) but keep CTRL-R (history search)
-FZF_ALT_C_COMMAND= source <(fzf --zsh)
-
-# --- Zoxide Setup ---
+# 5. TOOL INITS
 eval "$(zoxide init zsh)"
-
-# --- uv/uvx completions ---
-eval "$(uv generate-shell-completion zsh)"
-eval "$(uvx --generate-shell-completion zsh)"
-
-# --- fnm Features ---
-# Load fnm completions
-eval "$(fnm completions --shell zsh)"
-
-# Automatic version switching when changing directories
 eval "$(fnm env --use-on-cd --shell zsh)"
+source <(fzf --zsh)
 
 
-# 3. STARSHIP (Load the prompt LAST)
+# 6. ALIASES AND FUNCTIONS
+
+## "Refresh Completions" Function
+refresh_completions() {
+  local comp_dir="$HOME/.zsh/completions"
+  mkdir -p "$comp_dir"
+
+  echo "Refreshing completions..."
+  
+  # UV & FNM
+  [[ -x "$(command -v uv)" ]]  && uv generate-shell-completion zsh > "$comp_dir/_uv"
+  [[ -x "$(command -v fnm)" ]] && fnm completions --shell zsh > "$comp_dir/_fnm"
+  
+  # BUN: Manually copy the completion file to our managed directory
+  if [[ -f "$HOME/.bun/_bun" ]]; then
+    cp "$HOME/.bun/_bun" "$comp_dir/_bun"
+    echo "Bun completions cached."
+  fi
+  
+  echo "Done! Run 'exec zsh' to apply."
+}
+
+
+# 7. STARSHIP (Load the prompt LAST)
 # It needs to wrap around everything else you've loaded.
 eval "$(starship init zsh)"
