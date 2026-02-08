@@ -17,3 +17,18 @@ fi
 
 # 5. Secrets
 [[ -f ~/.zshenv_secrets ]] && source ~/.zshenv_secrets
+
+
+# 6. ENV VARS
+
+# bun
+export BUN_INSTALL="$HOME/.bun"
+export PATH="$BUN_INSTALL/bin:$PATH"
+
+export PATH="$HOME/.local/bin:$PATH"
+
+
+# Customize zsh-autosuggestions color
+# 240 is a balanced "Grey" on most 256-color terminals
+export ZSH_AUTOSUGGEST_STRATEGY=(history completion)
+export ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE="fg=240"

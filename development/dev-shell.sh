@@ -1,6 +1,7 @@
 #!/bin/sh
 echo ' > Development :: Zsh'
 
+
 ## Install `zsh` and set it as default shell ---------------
 
 sudo apt-get install -y zsh
@@ -14,7 +15,8 @@ echo $SHELL
 
 curl -fsSL https://raw.githubusercontent.com/getnf/getnf/main/install.sh | bash
 source $HOME/.local/bin
-getnf -i 21,24,29,41,47,52,59
+# getnf -i 21,24,29,41,47,52,59
+getnf -i JetBrainsMono
 fc-cache -fv
 
 ## Install Starship ----------------------------------------
@@ -51,40 +53,55 @@ gsettings set org.gnome.Terminal.Legacy.Profile:/org/gnome/terminal/legacy/profi
 ## Copy base configuration files ---------------------------
 
 ## Installing other tools like `fnm` and `uv` write to `~/.zshrc`,
-##  but default, safe exports could hurt performance ...
-## We use custom configuration instead!
+##  but default, "safe" exports could hurt performance ...
+## Use the provided custom configuration instead!
 
-# Create timestamp for this backup session
-TIMESTAMP=$(date +%Y%m%d_%H%M%S)
-
-# Array of files to backup (in HOME directory)
-FILES_TO_BACKUP=(".zprofile" ".zshrc" ".zshenv_secrets")
-
-echo "Backing up files with timestamp: $TIMESTAMP"
-
-# Backup existing files
-for file in "${FILES_TO_BACKUP[@]}"; do
-    SOURCE="$HOME/$file"
+backup_and_update_configs() {
+    # Create timestamp for this backup session
+    local TIMESTAMP=$(date +%Y%m%d_%H%M%S)
     
-    # Check if file exists before backing up
-    if [ -f "$SOURCE" ]; then
-        BACKUP="${SOURCE}.backup_${TIMESTAMP}"
-        cp "$SOURCE" "$BACKUP"
-        echo "Backed up: $file -> $(basename $BACKUP)"
-    else
-        echo "Skipped: $file (doesn't exist)"
-    fi
-done
+    # Associative array: target_file => source_file
+    # Note: requires bash 4+ or zsh for associative arrays
+    declare -A CONFIG_FILES=(
+        [".zprofile"]="zprofile_base"
+        [".zshrc"]="zshrc_base"
+        [".zshenv_secrets"]="zshenv_secrets_base"
+        [".zsh_plugins.txt"]="zsh_plugins.txt_base"
+    )
+    
+    echo "Backing up and updating config files with timestamp: $TIMESTAMP"
+    echo ""
+    
+    # Process each config file
+    for target_file in "${!CONFIG_FILES[@]}"; do
+        local source_base="${CONFIG_FILES[$target_file]}"
+        local target_path="$HOME/$target_file"
+        
+        # Backup existing file if it exists
+        if [ -f "$target_path" ]; then
+            local backup_path="${target_path}.backup_${TIMESTAMP}"
+            cp "$target_path" "$backup_path"
+            echo "✓ Backed up: $target_file -> $(basename $backup_path)"
+        else
+            echo "⊘ Skipped backup: $target_file (doesn't exist)"
+        fi
+        
+        # Copy new version if source exists
+        if [ -f "$source_base" ]; then
+            cp "$source_base" "$target_path" && \
+            sudo chown $USER "$target_path" && \
+            echo "✓ Installed: $target_file"
+        else
+            echo "✗ Error: Source file $source_base not found"
+        fi
+        
+        echo ""
+    done
+    
+    echo "Done! Old files saved with timestamp: $TIMESTAMP"
+}
 
-echo ""
-echo "Coping new versions..."
+backup_and_update_configs
 
-# Copy new config file versions
-cp zprofile_base ~/.zprofile && sudo chown $USER ~/.zprofile && echo "Copied ~/.zprofile"
-cp zshrc_base ~/.zshrc && sudo chown $USER ~/.zshrc && echo "Copied ~/.zshrc"
-cp zshenv_secrets ~/.zshenv_secrets && sudo chown $USER ~/.zshenv_secrets && echo "Copied ~/.zshenv_secrets"
-
-echo ""
-echo "Done! Your old files are saved with timestamp: $TIMESTAMP"
 
 echo '   [zsh, starship, antidote]     ...done!'

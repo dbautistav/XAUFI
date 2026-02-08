@@ -9,6 +9,7 @@ echo 'XAUFI: After Ubuntu Fresh Install'
 ./system/sys-homebrew.sh
 
 ./development/dev-node.sh
+./development/dev-bun.sh
 ./development/dev-python.sh
 ./development/dev-vscode.sh
 ./development/dev-shell.sh
